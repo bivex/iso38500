@@ -79,7 +79,7 @@ func NewMCPServer() *MCPServer {
 	eventRepo := memory.NewDomainEventRepositoryMemory()
 
 	// Initialize domain services
-	evalService := domain.NewEvaluationService(appRepo, govRepo, nil, nil)
+	evalService := domain.NewEvaluationService(appRepo, govRepo, portfolioRepo, nil, nil)
 	directService := domain.NewDirectionService(govRepo)
 	monitorService := domain.NewMonitoringService(nil, nil, nil, govRepo)
 
@@ -132,6 +132,10 @@ func (s *MCPServer) handleRequest(req MCPRequest) *MCPResponse {
 	case "tools/call":
 		return s.handleCallTool(req)
 	default:
+		// Only return error response if we have an ID (not a notification)
+		if req.ID == nil {
+			return nil // Don't respond to notifications
+		}
 		return &MCPResponse{
 			JSONRPC: "2.0",
 			ID:       *req.ID,
@@ -724,6 +728,9 @@ func (s *MCPServer) runEnterpriseDemo(args map[string]interface{}) (interface{},
 }
 
 func (s *MCPServer) errorResponse(req MCPRequest, message string) *MCPResponse {
+	if req.ID == nil {
+		return nil // Don't respond to notifications
+	}
 	return &MCPResponse{
 		JSONRPC: "2.0",
 		ID:       *req.ID,

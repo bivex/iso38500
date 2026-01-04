@@ -7,7 +7,7 @@
  * https://github.com/bivex
  *
  * Created: 2026-01-04T06:33:59
- * Last Updated: 2026-01-04T06:47:59
+ * Last Updated: 2026-01-04T06:57:49
  *
  * Licensed under the MIT License.
  * Commercial licensing available upon request.
@@ -38,7 +38,7 @@ func main() {
 	eventRepo := memory.NewDomainEventRepositoryMemory()
 
 	// Initialize domain services
-	evalService := domain.NewEvaluationService(appRepo, govRepo, nil, nil)
+	evalService := domain.NewEvaluationService(appRepo, govRepo, portfolioRepo, nil, nil)
 	directService := domain.NewDirectionService(govRepo)
 	monitorService := domain.NewMonitoringService(nil, nil, nil, govRepo)
 

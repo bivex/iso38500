@@ -25,15 +25,17 @@ import (
 type EvaluationService struct {
 	applicationRepo ApplicationRepository
 	agreementRepo   GovernanceAgreementRepository
+	portfolioRepo   ApplicationPortfolioRepository
 	kpiRepo         KPIRepository
 	riskRepo        RiskRepository
 }
 
 // NewEvaluationService creates a new evaluation service
-func NewEvaluationService(appRepo ApplicationRepository, agreementRepo GovernanceAgreementRepository, kpiRepo KPIRepository, riskRepo RiskRepository) *EvaluationService {
+func NewEvaluationService(appRepo ApplicationRepository, agreementRepo GovernanceAgreementRepository, portfolioRepo ApplicationPortfolioRepository, kpiRepo KPIRepository, riskRepo RiskRepository) *EvaluationService {
 	return &EvaluationService{
 		applicationRepo: appRepo,
 		agreementRepo:   agreementRepo,
+		portfolioRepo:   portfolioRepo,
 		kpiRepo:         kpiRepo,
 		riskRepo:        riskRepo,
 	}
@@ -78,11 +80,13 @@ func (s *EvaluationService) EvaluateApplication(ctx context.Context, appID Appli
 
 // EvaluatePortfolio performs evaluation of the entire portfolio
 func (s *EvaluationService) EvaluatePortfolio(ctx context.Context, portfolioID PortfolioID) (*PortfolioHealthAssessment, error) {
-	// Get all applications in portfolio
-	apps, err := s.applicationRepo.FindByPortfolioID(ctx, portfolioID)
+	// Get portfolio and its applications
+	portfolio, err := s.portfolioRepo.FindByID(ctx, portfolioID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find portfolio applications: %w", err)
+		return nil, fmt.Errorf("failed to find portfolio: %w", err)
 	}
+
+	apps := portfolio.Applications
 
 	totalApps := len(apps)
 	activeApps := 0
